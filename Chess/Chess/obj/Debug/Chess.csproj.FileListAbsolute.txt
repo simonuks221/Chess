@@ -1,0 +1,9 @@
+C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\bin\Debug\Chess.exe.config
+C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\bin\Debug\Chess.exe
+C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\bin\Debug\Chess.pdb
+C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\obj\Debug\Chess.csprojResolveAssemblyReference.cache
+C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\obj\Debug\Chess.Form1.resources
+C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\obj\Debug\Chess.Properties.Resources.resources
+C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\obj\Debug\Chess.csproj.GenerateResource.Cache
+C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\obj\Debug\Chess.exe
+C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\obj\Debug\Chess.pdb
