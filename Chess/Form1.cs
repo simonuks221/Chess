@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -163,9 +164,15 @@ namespace Chess
         {
             List<ChessBoardNode> validMoves = new List<ChessBoardNode>();
             List<ChessBoardNode> validAttackMoves = new List<ChessBoardNode>();
-            /*
-            switch (_arrayFrom[selectedX, selectedY].chessPiece)
+
+            CPClass chessPiece = chessBoardNodeArray[selectedX, selectedY].chessPiece;
+
+            foreach(Point p in chessPiece.moveOffsets)
             {
+                AddAvailableMoves(selectedX + p.X, selectedY + p.Y, validMoves, false); ;
+            }
+            /*
+           
                 case ChessPiece.Bishop:
                     for(int i = 1; i < 8; i++)
                     {
@@ -184,26 +191,6 @@ namespace Chess
                         if (!AddAvailableMoves(selectedX - i, selectedY + i, validMoves)) break;
                     }
 
-                    break;
-                case ChessPiece.King:
-                    AddAvailableMoves(selectedX, selectedY + 1, validMoves);
-                    AddAvailableMoves(selectedX, selectedY - 1, validMoves);
-                    AddAvailableMoves(selectedX + 1, selectedY, validMoves);
-                    AddAvailableMoves(selectedX + 1, selectedY + 1, validMoves);
-                    AddAvailableMoves(selectedX + 1, selectedY - 1, validMoves);
-                    AddAvailableMoves(selectedX - 1, selectedY, validMoves);
-                    AddAvailableMoves(selectedX - 1, selectedY + 1, validMoves);
-                    AddAvailableMoves(selectedX - 1, selectedY - 1, validMoves);
-                    break;
-                case ChessPiece.Knight:
-                    AddAvailableMoves(selectedX + 1, selectedY + 2, validMoves);
-                    AddAvailableMoves(selectedX + 1, selectedY - 2, validMoves);
-                    AddAvailableMoves(selectedX - 1, selectedY + 2, validMoves);
-                    AddAvailableMoves(selectedX - 1, selectedY - 2, validMoves);
-                    AddAvailableMoves(selectedX + 2, selectedY + 1, validMoves);
-                    AddAvailableMoves(selectedX + 2, selectedY - 1, validMoves);
-                    AddAvailableMoves(selectedX - 2, selectedY + 1, validMoves);
-                    AddAvailableMoves(selectedX - 2, selectedY - 1, validMoves);
                     break;
                 case ChessPiece.Pawn:
                     if(_arrayFrom[selectedX, selectedY].chessPieceColor == ChessPieceColor.White)
@@ -295,7 +282,7 @@ namespace Chess
                         if (!AddAvailableMoves(selectedX, y, validMoves)) break;
                     }
                     break;
-            }
+            
             */
             validOnlyAttackMoves = validAttackMoves;
             return validMoves;
@@ -305,7 +292,7 @@ namespace Chess
         {
             if (x < 8 && x >= 0 && y < 8 && y >= 0)
             {
-                if (chessBoardNodeArray[x, y].chessPiece.pieceColor == ChessPieceColor.None)
+                if (chessBoardNodeArray[x, y].chessPiece == null)
                 {
                     arrayToAdd.Add(chessBoardNodeArray[x, y]);
                     chessBoardNodeArray[x, y].ChangeColor(ChessBoardNodeColor.Selected);
@@ -328,7 +315,7 @@ namespace Chess
             }
         }
 
-        bool AddAvailableOnlyAttacks(int x, int y,ChessBoardNode[,] _arrayFrom, List<ChessBoardNode> _arrayToAdd) //Return if can attack here
+        bool AddAvailableOnlyAttacks(int x, int y, ChessBoardNode[,] _arrayFrom, List<ChessBoardNode> _arrayToAdd) //Return if can attack here
         {
             if (x < 8 && x >= 0 && y < 8 && y >= 0)
             {
@@ -355,16 +342,16 @@ namespace Chess
 
         public void ChangePieceLocation(int fromX, int fromY, int toX, int toY) //Move piece
         {
-            /*
-            if(chessBoardNodeArray[toX, toY].chessPiece == ChessPiece.King) //Check win conditions
+            
+            if((CPKing)chessBoardNodeArray[toX, toY].chessPiece != null) //Check win conditions
             {
                 moveColor = ChessPieceColor.None;
-                MoveLabel.Text = chessBoardNodeArray[fromX, fromY].chessPieceColor + " won";
+                MoveLabel.Text = chessBoardNodeArray[fromX, fromY].chessPiece.pieceColor + " won";
             }
             else
             {
-                chessBoardNodeArray[toX, toY].ChangePiece(chessBoardNodeArray[fromX, fromY].chessPiece, chessBoardNodeArray[fromX, fromY].chessPieceColor);
-                chessBoardNodeArray[fromX, fromY].ChangePiece(ChessPiece.None, ChessPieceColor.None);
+                chessBoardNodeArray[toX, toY].ChangePiece(chessBoardNodeArray[fromX, fromY].chessPiece);
+                chessBoardNodeArray[fromX, fromY].ChangePiece(null);
 
                 //Change current moving team color
                 if (moveColor == ChessPieceColor.White)
@@ -378,7 +365,7 @@ namespace Chess
                 }
                 MoveLabel.Text = moveColor.ToString();
             }
-            */
+            
             SoftClearBoard();
 
             if (moveColor == ChessPieceColor.Black)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,8 @@ namespace Chess
         public int y;
 
         public ChessPieceColor pieceColor;
+
+        public List<Point> moveOffsets = new List<Point>();
 
         public string CPName = "NULL";
 
@@ -30,6 +33,15 @@ namespace Chess
         public CPPawn(int _x, int _y, ChessPieceColor _pieceColor) : base(_x, _y, _pieceColor)
         {
             CPName = "Pawn";
+
+            if (pieceColor == ChessPieceColor.White)
+            {
+                moveOffsets.Add(new Point(0, 1));
+            }
+            else
+            {
+                moveOffsets.Add(new Point(0, -1));
+            }
         }
     }
 
@@ -38,6 +50,15 @@ namespace Chess
         public CPRook(int _x, int _y, ChessPieceColor _pieceColor) : base(_x, _y, _pieceColor)
         {
             CPName = "Rook";
+
+            for (int xx = -8; xx <=8; xx++)
+            {
+                moveOffsets.Add(new Point(xx, 0));
+            }
+            for (int yy = -8; yy <= 8; yy++)
+            {
+                moveOffsets.Add(new Point(0, yy));
+            }
         }
     }
 
@@ -54,7 +75,11 @@ namespace Chess
         public CPKnight(int _x, int _y, ChessPieceColor _pieceColor) : base(_x, _y, _pieceColor)
         {
             CPName = "Knight";
+
+            moveOffsets.AddRange(new List<Point>() { new Point(1, 2), new Point(1, -2), new Point(-1, 2), new Point(-1, -2), new Point(2, 1), new Point(2, -1), new Point(-2, 1), new Point(-2, -1) });
         }
+
+        
     }
 
     public class CPQueen : CPClass
@@ -70,6 +95,14 @@ namespace Chess
         public CPKing(int _x, int _y, ChessPieceColor _pieceColor) : base(_x, _y, _pieceColor)
         {
             CPName = "King";
+
+            for(int xx = -1; xx <= 1; xx++)
+            {
+                for(int yy = -1; yy <= 1; yy++)
+                {
+                     moveOffsets.Add(new Point(xx, yy));
+                }
+            }
         }
     }
 }
