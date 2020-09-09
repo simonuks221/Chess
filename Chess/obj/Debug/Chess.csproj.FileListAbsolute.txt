@@ -8,3 +8,13 @@ C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\obj\Debug\Chess
 C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\obj\Debug\Chess.pdb
 C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\obj\Debug\Chess.csproj.CoreCompileInputs.cache
 C:\Users\User\Desktop\SimonoDalykai\FormsAplications\Chess\Chess\obj\Debug\Chess.csprojAssemblyReference.cache
+C:\Users\simon\Documents\GitHub\Chess\Chess\bin\Debug\Chess.exe.config
+C:\Users\simon\Documents\GitHub\Chess\Chess\bin\Debug\Chess.exe
+C:\Users\simon\Documents\GitHub\Chess\Chess\bin\Debug\Chess.pdb
+C:\Users\simon\Documents\GitHub\Chess\Chess\obj\Debug\Chess.csprojAssemblyReference.cache
+C:\Users\simon\Documents\GitHub\Chess\Chess\obj\Debug\Chess.Form1.resources
+C:\Users\simon\Documents\GitHub\Chess\Chess\obj\Debug\Chess.Properties.Resources.resources
+C:\Users\simon\Documents\GitHub\Chess\Chess\obj\Debug\Chess.csproj.GenerateResource.cache
+C:\Users\simon\Documents\GitHub\Chess\Chess\obj\Debug\Chess.csproj.CoreCompileInputs.cache
+C:\Users\simon\Documents\GitHub\Chess\Chess\obj\Debug\Chess.exe
+C:\Users\simon\Documents\GitHub\Chess\Chess\obj\Debug\Chess.pdb

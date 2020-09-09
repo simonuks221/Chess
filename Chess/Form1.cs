@@ -13,6 +13,7 @@ namespace Chess
     public partial class Form1 : Form
     {
         public ChessBoardNode[,] chessBoardNodeArray;
+        List<CPClass> chessPieces = new List<CPClass>();
 
         public int selectedX = -1; //Seected chess piece coords
         public int selectedY = -1;
@@ -21,8 +22,6 @@ namespace Chess
         List<ChessBoardNode> availableAttackNodes = new List<ChessBoardNode>();
 
         ChessPieceColor moveColor;
-
-        ChessAi chessAi;
 
         public Form1()
         {
@@ -70,30 +69,41 @@ namespace Chess
             //Set all starting pieces
             for (int x = 0; x < 8; x++) //Set pawns
             {
-                chessBoardNodeArray[x, 1].ChangePiece(ChessPiece.Pawn, ChessPieceColor.White);
-                chessBoardNodeArray[x, 6].ChangePiece(ChessPiece.Pawn, ChessPieceColor.Black);
+
+                SpawnChessPiece(x, 1, ChessPieceColor.White, typeof(CPPawn));
+                SpawnChessPiece(x, 6, ChessPieceColor.Black, typeof(CPPawn));
             }
 
-            chessBoardNodeArray[0, 0].ChangePiece(ChessPiece.Rook, ChessPieceColor.White);
-            chessBoardNodeArray[7, 0].ChangePiece(ChessPiece.Rook, ChessPieceColor.White);
-            chessBoardNodeArray[0, 7].ChangePiece(ChessPiece.Rook, ChessPieceColor.Black);
-            chessBoardNodeArray[7, 7].ChangePiece(ChessPiece.Rook, ChessPieceColor.Black);
+            
+            SpawnChessPiece(0, 0, ChessPieceColor.White, typeof(CPRook));
+            SpawnChessPiece(7, 0, ChessPieceColor.White, typeof(CPRook));
+            SpawnChessPiece(0, 7, ChessPieceColor.Black, typeof(CPRook));
+            SpawnChessPiece(7, 7, ChessPieceColor.Black, typeof(CPRook));
 
-            chessBoardNodeArray[1, 0].ChangePiece(ChessPiece.Knight, ChessPieceColor.White);
-            chessBoardNodeArray[6, 0].ChangePiece(ChessPiece.Knight, ChessPieceColor.White);
-            chessBoardNodeArray[1, 7].ChangePiece(ChessPiece.Knight, ChessPieceColor.Black);
-            chessBoardNodeArray[6, 7].ChangePiece(ChessPiece.Knight, ChessPieceColor.Black);
+            SpawnChessPiece(1, 0, ChessPieceColor.White, typeof(CPKnight));
+            SpawnChessPiece(6, 0, ChessPieceColor.White, typeof(CPKnight));
+            SpawnChessPiece(1, 7, ChessPieceColor.Black, typeof(CPKnight));
+            SpawnChessPiece(6, 7, ChessPieceColor.Black, typeof(CPKnight));
 
-            chessBoardNodeArray[2, 0].ChangePiece(ChessPiece.Bishop, ChessPieceColor.White);
-            chessBoardNodeArray[5, 0].ChangePiece(ChessPiece.Bishop, ChessPieceColor.White);
-            chessBoardNodeArray[2, 7].ChangePiece(ChessPiece.Bishop, ChessPieceColor.Black);
-            chessBoardNodeArray[5, 7].ChangePiece(ChessPiece.Bishop, ChessPieceColor.Black);
+            SpawnChessPiece(2, 0, ChessPieceColor.White, typeof(CPBishop));
+            SpawnChessPiece(5, 0, ChessPieceColor.White, typeof(CPBishop));
+            SpawnChessPiece(2, 7, ChessPieceColor.Black, typeof(CPBishop));
+            SpawnChessPiece(5, 7, ChessPieceColor.Black, typeof(CPBishop));
 
-            chessBoardNodeArray[3, 0].ChangePiece(ChessPiece.Queen, ChessPieceColor.White);
-            chessBoardNodeArray[3, 7].ChangePiece(ChessPiece.Queen, ChessPieceColor.Black);
+            SpawnChessPiece(3, 0, ChessPieceColor.White, typeof(CPQueen));
+            SpawnChessPiece(3, 7, ChessPieceColor.Black, typeof(CPQueen));
 
-            chessBoardNodeArray[4, 0].ChangePiece(ChessPiece.King, ChessPieceColor.White);
-            chessBoardNodeArray[4, 7].ChangePiece(ChessPiece.King, ChessPieceColor.Black);
+            SpawnChessPiece(4, 0, ChessPieceColor.White, typeof(CPKing));
+            SpawnChessPiece(4, 7, ChessPieceColor.Black, typeof(CPKing));
+            
+        }
+
+        public void SpawnChessPiece(int x, int y, ChessPieceColor color, Type _CPClass )
+        {
+            Object newObject = Activator.CreateInstance(_CPClass, new Object[] {x, y, color });
+            CPClass newClass = (CPClass)newObject;
+            chessPieces.Add(newClass);
+            chessBoardNodeArray[x, y].ChangePiece(newClass);
         }
 
         public void onButtonPressed(object sender, EventArgs e) //Chess board button pressed
@@ -105,7 +115,7 @@ namespace Chess
 
             if(selectedX == -1 && selectedY == -1) //First selection
             {
-                if (chessBoardNodeArray[locX, locY].chessPiece != ChessPiece.None && chessBoardNodeArray[locX, locY].chessPieceColor == moveColor)
+                if (chessBoardNodeArray[locX, locY].chessPiece != null && chessBoardNodeArray[locX, locY].chessPiece.pieceColor == moveColor)
                 {
                     availableMoveNodes.Clear();
 
@@ -153,6 +163,7 @@ namespace Chess
         {
             List<ChessBoardNode> validMoves = new List<ChessBoardNode>();
             List<ChessBoardNode> validAttackMoves = new List<ChessBoardNode>();
+            /*
             switch (_arrayFrom[selectedX, selectedY].chessPiece)
             {
                 case ChessPiece.Bishop:
@@ -285,6 +296,7 @@ namespace Chess
                     }
                     break;
             }
+            */
             validOnlyAttackMoves = validAttackMoves;
             return validMoves;
         }
@@ -293,13 +305,13 @@ namespace Chess
         {
             if (x < 8 && x >= 0 && y < 8 && y >= 0)
             {
-                if (chessBoardNodeArray[x, y].chessPieceColor == ChessPieceColor.None)
+                if (chessBoardNodeArray[x, y].chessPiece.pieceColor == ChessPieceColor.None)
                 {
                     arrayToAdd.Add(chessBoardNodeArray[x, y]);
                     chessBoardNodeArray[x, y].ChangeColor(ChessBoardNodeColor.Selected);
                     return true;
                 }
-                else if (chessBoardNodeArray[x, y].chessPieceColor != chessBoardNodeArray[selectedX, selectedY].chessPieceColor && canAttack)
+                else if (chessBoardNodeArray[x, y].chessPiece.pieceColor != chessBoardNodeArray[selectedX, selectedY].chessPiece.pieceColor && canAttack)
                 {
                     arrayToAdd.Add(chessBoardNodeArray[x, y]);
                     chessBoardNodeArray[x, y].ChangeColor(ChessBoardNodeColor.Kill);
@@ -320,11 +332,11 @@ namespace Chess
         {
             if (x < 8 && x >= 0 && y < 8 && y >= 0)
             {
-                if (_arrayFrom[x, y].chessPieceColor == ChessPieceColor.None)
+                if (_arrayFrom[x, y].chessPiece.pieceColor == ChessPieceColor.None)
                 {
                     return false;
                 }
-                else if (_arrayFrom[x, y].chessPieceColor != _arrayFrom[selectedX, selectedY].chessPieceColor)
+                else if (_arrayFrom[x, y].chessPiece.pieceColor != _arrayFrom[selectedX, selectedY].chessPiece.pieceColor)
                 {
                     _arrayToAdd.Add(chessBoardNodeArray[x, y]);
                     _arrayFrom[x, y].ChangeColor(ChessBoardNodeColor.Kill);
@@ -343,6 +355,7 @@ namespace Chess
 
         public void ChangePieceLocation(int fromX, int fromY, int toX, int toY) //Move piece
         {
+            /*
             if(chessBoardNodeArray[toX, toY].chessPiece == ChessPiece.King) //Check win conditions
             {
                 moveColor = ChessPieceColor.None;
@@ -365,17 +378,14 @@ namespace Chess
                 }
                 MoveLabel.Text = moveColor.ToString();
             }
+            */
             SoftClearBoard();
 
             if (moveColor == ChessPieceColor.Black)
             {
                 if (UseAiCheckBox.Checked)
                 {
-                    if (chessAi == null)
-                    {
-                        chessAi = new ChessAi(this);
-                    }
-                    chessAi.MoveAi();
+                    
                 }
             }
         }

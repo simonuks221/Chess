@@ -1,10 +1,6 @@
-﻿using System;
+﻿using Chess;
+using System;
 using System.Windows.Forms;
-
-
-public enum ChessPieceColor { None, White, Black};
-
-public enum ChessPiece {None, King, Queen, Rook, Bishop, Knight, Pawn};
 
 public enum ChessBoardNodeColor { None, Selected, Kill};
 
@@ -13,8 +9,7 @@ public class ChessBoardNode
     public int locationX;
     public int locationY;
 
-    public ChessPiece chessPiece;
-    public ChessPieceColor chessPieceColor;
+    public CPClass chessPiece;
 
     public Button thisButton;
 
@@ -28,21 +23,20 @@ public class ChessBoardNode
         ChangeColor(ChessBoardNodeColor.None);
 	}
 
-    public void ChangePiece(ChessPiece _chessPiece, ChessPieceColor _color) //Changes piece location
+    public void ChangePiece(CPClass _chessPiece) //Changes piece location
     {
         chessPiece = _chessPiece;
-        chessPieceColor = _color;
         if (thisButton != null)
         {
-            if (chessPiece == ChessPiece.None) //empty piece
+            if (chessPiece == null) //empty piece
             {
                 thisButton.Text = "";
             }
             else
             {
-                thisButton.Text = chessPiece.ToString();
+                thisButton.Text = chessPiece.CPName;
 
-                if (_color == ChessPieceColor.White)
+                if (chessPiece.pieceColor == ChessPieceColor.White)
                 {
                     thisButton.ForeColor = System.Drawing.Color.White;
                 }
