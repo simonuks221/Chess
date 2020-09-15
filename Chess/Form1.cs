@@ -36,7 +36,7 @@ namespace Chess
 
         void ResetBoard()
         {
-            if(chessBoardNodeArray != null) //Clear all buttons from previos play
+            if (chessBoardNodeArray != null) //Clear all buttons from previos play
             {
                 List<Button> buttons = ChessBoard.Controls.OfType<Button>().ToList();
                 foreach (Button b in buttons)
@@ -75,7 +75,7 @@ namespace Chess
                 SpawnChessPiece(x, 6, ChessPieceColor.Black, typeof(CPPawn));
             }
 
-            
+
             SpawnChessPiece(0, 0, ChessPieceColor.White, typeof(CPRook));
             SpawnChessPiece(7, 0, ChessPieceColor.White, typeof(CPRook));
             SpawnChessPiece(0, 7, ChessPieceColor.Black, typeof(CPRook));
@@ -96,12 +96,12 @@ namespace Chess
 
             SpawnChessPiece(4, 0, ChessPieceColor.White, typeof(CPKing));
             SpawnChessPiece(4, 7, ChessPieceColor.Black, typeof(CPKing));
-            
+
         }
 
-        public void SpawnChessPiece(int x, int y, ChessPieceColor color, Type _CPClass )
+        public void SpawnChessPiece(int x, int y, ChessPieceColor color, Type _CPClass)
         {
-            Object newObject = Activator.CreateInstance(_CPClass, new Object[] {x, y, color });
+            Object newObject = Activator.CreateInstance(_CPClass, new Object[] { x, y, color });
             CPClass newClass = (CPClass)newObject;
             chessPieces.Add(newClass);
             chessBoardNodeArray[x, y].ChangePiece(newClass);
@@ -114,7 +114,7 @@ namespace Chess
             int locX = (int)Math.Floor(buttonClicked.Location.X / 50f); //Get pressed button x and y coords
             int locY = (int)Math.Floor(buttonClicked.Location.Y / 50f);
 
-            if(selectedX == -1 && selectedY == -1) //First selection
+            if (selectedX == -1 && selectedY == -1) //First selection
             {
                 if (chessBoardNodeArray[locX, locY].chessPiece != null && chessBoardNodeArray[locX, locY].chessPiece.pieceColor == moveColor)
                 {
@@ -124,12 +124,13 @@ namespace Chess
                     selectedY = locY;
 
                     chessBoardNodeArray[locX, locY].ChangeColor(ChessBoardNodeColor.Selected);
-                    availableMoveNodes = ShowValidMoves(chessBoardNodeArray, out availableAttackNodes);
+                    availableMoveNodes = GetMoves();
+                    ShowMoves(availableMoveNodes);
                 }
             }
             else //Pressed after seleceting a piece, move a piece
             {
-                if(availableMoveNodes.Contains(chessBoardNodeArray[locX, locY]) || availableAttackNodes.Contains(chessBoardNodeArray[locX, locY]))
+                if (availableMoveNodes.Contains(chessBoardNodeArray[locX, locY]) || availableAttackNodes.Contains(chessBoardNodeArray[locX, locY]))
                 {
                     ChangePieceLocation(selectedX, selectedY, locX, locY);
                 }
@@ -148,9 +149,9 @@ namespace Chess
                 selectedY = -1;
 
 
-                for(int x = 0; x < 8; x++)
+                for (int x = 0; x < 8; x++)
                 {
-                    for(int y = 0; y < 8; y++)
+                    for (int y = 0; y < 8; y++)
                     {
                         chessBoardNodeArray[x, y].ChangeColor(ChessBoardNodeColor.None);
                     }
@@ -160,185 +161,33 @@ namespace Chess
             }
         }
 
-        public List<ChessBoardNode> ShowValidMoves(ChessBoardNode[,] _arrayFrom, out List<ChessBoardNode> validOnlyAttackMoves) //Show valid selected piece moves
+        public void ShowMoves(List<ChessBoardNode> moves) //Return if can move here
         {
-            List<ChessBoardNode> validMoves = new List<ChessBoardNode>();
-            List<ChessBoardNode> validAttackMoves = new List<ChessBoardNode>();
+            foreach (ChessBoardNode n in moves)
+            {
+                Console.WriteLine(n.locationX + " " + n.locationY);
+                if (n.chessPiece == null)
+                {
+                    n.ChangeColor(ChessBoardNodeColor.Selected);
+                }
+                else
+                {
+                    n.ChangeColor(ChessBoardNodeColor.Kill);
+                }
+            }
+        }
+
+        public List<ChessBoardNode> GetMoves() //Show valid selected piece moves
+        {
+            List<ChessBoardNode> newMoves = new List<ChessBoardNode>();
 
             CPClass chessPiece = chessBoardNodeArray[selectedX, selectedY].chessPiece;
 
-            foreach(Point p in chessPiece.moveOffsets)
-            {
-                AddAvailableMoves(selectedX + p.X, selectedY + p.Y, validMoves, false); ;
-            }
-            /*
-           
-                case ChessPiece.Bishop:
-                    for(int i = 1; i < 8; i++)
-                    {
-                        if (!AddAvailableMoves(selectedX + i, selectedY + i, validMoves)) break;
-                    }
-                    for (int i = 1; i < 8; i++)
-                    {
-                        if (!AddAvailableMoves(selectedX - i, selectedY - i, validMoves)) break;
-                    }
-                    for (int i = 1; i < 8; i++)
-                    {
-                        if (!AddAvailableMoves(selectedX + i, selectedY - i, validMoves)) break;
-                    }
-                    for (int i = 1; i < 8; i++)
-                    {
-                        if (!AddAvailableMoves(selectedX - i, selectedY + i, validMoves)) break;
-                    }
+            chessPiece.GetAvailableMoves(chessBoardNodeArray, out newMoves);
 
-                    break;
-                case ChessPiece.Pawn:
-                    if(_arrayFrom[selectedX, selectedY].chessPieceColor == ChessPieceColor.White)
-                    { //White
-                        if(selectedY == 1) //Can go 2 times
-                        {
-                            AddAvailableMoves(selectedX, selectedY + 1, validMoves, false);
-                            AddAvailableMoves(selectedX, selectedY + 2, validMoves, false);
-                        }
-                        else
-                        {
-                            AddAvailableMoves(selectedX, selectedY + 1, validMoves, false);
-                        }
-
-                        AddAvailableOnlyAttacks(selectedX + 1, selectedY + 1, _arrayFrom, validAttackMoves);
-                        AddAvailableOnlyAttacks(selectedX - 1, selectedY + 1, _arrayFrom, validAttackMoves);
-
-                    }
-                    else //Black
-                    {
-                        if(selectedY == 6) //Can go 2
-                        {
-                            AddAvailableMoves(selectedX, selectedY - 1, validMoves, false);
-                            AddAvailableMoves(selectedX, selectedY - 2, validMoves, false);
-                        }
-                        else
-                        {
-                            AddAvailableMoves(selectedX, selectedY - 1, validMoves, false);
-                        }
-
-                        AddAvailableOnlyAttacks(selectedX + 1, selectedY - 1, _arrayFrom, validAttackMoves);
-                        AddAvailableOnlyAttacks(selectedX - 1, selectedY - 1, _arrayFrom, validAttackMoves);
-                    }
-
-
-                    break;
-                case ChessPiece.Queen:
-                    for (int x = selectedX + 1; x < 8; x++)
-                    {
-                        if (!AddAvailableMoves(x, selectedY, validMoves)) break;
-                    }
-                    for (int x = selectedX - 1; x >= 0; x--)
-                    {
-                        if (!AddAvailableMoves(x, selectedY, validMoves)) break;
-                    }
-                    for (int y = selectedY + 1; y < 8; y++)
-                    {
-                        if (!AddAvailableMoves(selectedX, y, validMoves)) break;
-                    }
-
-                    for (int y = selectedY - 1; y >= 0; y--)
-                    {
-                        if (!AddAvailableMoves(selectedX, y, validMoves)) break;
-                    }
-                    for (int i = 1; i < 8; i++)
-                    {
-                        if (!AddAvailableMoves(selectedX + i, selectedY + i, validMoves)) break;
-                    }
-                    for (int i = 1; i < 8; i++)
-                    {
-                        if (!AddAvailableMoves(selectedX - i, selectedY - i, validMoves)) break;
-                    }
-                    for (int i = 1; i < 8; i++)
-                    {
-                        if (!AddAvailableMoves(selectedX + i, selectedY - i, validMoves)) break;
-                    }
-                    for (int i = 1; i < 8; i++)
-                    {
-                        if (!AddAvailableMoves(selectedX - i, selectedY + i, validMoves)) break;
-                    }
-                    break;
-                case ChessPiece.Rook:
-                    for(int x = selectedX + 1; x < 8; x++)
-                    {
-                        if (!AddAvailableMoves(x, selectedY, validMoves)) break;
-                    }
-                    for(int x = selectedX - 1; x >= 0; x--)
-                    {
-                        if (!AddAvailableMoves(x, selectedY, validMoves)) break;
-                    }
-
-                    for (int y = selectedY + 1; y < 8; y++)
-                    {
-                        if (!AddAvailableMoves(selectedX, y, validMoves)) break;
-                    }
-
-                    for (int y = selectedY - 1; y >= 0; y--)
-                    {
-                        if (!AddAvailableMoves(selectedX, y, validMoves)) break;
-                    }
-                    break;
-            
-            */
-            validOnlyAttackMoves = validAttackMoves;
-            return validMoves;
+            return newMoves;
         }
 
-        public bool AddAvailableMoves(int x, int y, List<ChessBoardNode> arrayToAdd, bool canAttack = true) //Return if can move here
-        {
-            if (x < 8 && x >= 0 && y < 8 && y >= 0)
-            {
-                if (chessBoardNodeArray[x, y].chessPiece == null)
-                {
-                    arrayToAdd.Add(chessBoardNodeArray[x, y]);
-                    chessBoardNodeArray[x, y].ChangeColor(ChessBoardNodeColor.Selected);
-                    return true;
-                }
-                else if (chessBoardNodeArray[x, y].chessPiece.pieceColor != chessBoardNodeArray[selectedX, selectedY].chessPiece.pieceColor && canAttack)
-                {
-                    arrayToAdd.Add(chessBoardNodeArray[x, y]);
-                    chessBoardNodeArray[x, y].ChangeColor(ChessBoardNodeColor.Kill);
-                    return false;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        bool AddAvailableOnlyAttacks(int x, int y, ChessBoardNode[,] _arrayFrom, List<ChessBoardNode> _arrayToAdd) //Return if can attack here
-        {
-            if (x < 8 && x >= 0 && y < 8 && y >= 0)
-            {
-                if (_arrayFrom[x, y].chessPiece.pieceColor == ChessPieceColor.None)
-                {
-                    return false;
-                }
-                else if (_arrayFrom[x, y].chessPiece.pieceColor != _arrayFrom[selectedX, selectedY].chessPiece.pieceColor)
-                {
-                    _arrayToAdd.Add(chessBoardNodeArray[x, y]);
-                    _arrayFrom[x, y].ChangeColor(ChessBoardNodeColor.Kill);
-                    return false;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
 
         public void ChangePieceLocation(int fromX, int fromY, int toX, int toY) //Move piece
         {
@@ -350,6 +199,9 @@ namespace Chess
             }
             else
             {
+                chessBoardNodeArray[fromX, fromY].chessPiece.x = toX;
+                chessBoardNodeArray[fromX, fromY].chessPiece.y = toY;
+
                 chessBoardNodeArray[toX, toY].ChangePiece(chessBoardNodeArray[fromX, fromY].chessPiece);
                 chessBoardNodeArray[fromX, fromY].ChangePiece(null);
 

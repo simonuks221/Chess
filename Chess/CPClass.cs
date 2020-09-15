@@ -9,14 +9,12 @@ namespace Chess
 {
 
     public enum ChessPieceColor { None, White, Black };
-    public class CPClass
+    public abstract class CPClass
     {
         public int x;
         public int y;
 
         public ChessPieceColor pieceColor;
-
-        public List<Point> moveOffsets = new List<Point>();
 
         public string CPName = "NULL";
 
@@ -26,6 +24,37 @@ namespace Chess
             y = _y;
             pieceColor = _pieceColor;
         }
+
+        public abstract void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves);
+
+        protected bool AddMove(ChessBoardNode[,] board, int newX, int newY, List<ChessBoardNode> moveList)
+        {
+            if(newX < 8 && newX >= 0 && newY < 8 && newY >= 0)
+            {
+                if (board[newX, newY].chessPiece == null)
+                {
+                    moveList.Add(board[newX, newY]);
+                    return true;
+                }
+                else
+                {
+                    if (board[newX, newY].chessPiece.pieceColor == pieceColor)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        moveList.Add(board[newX, newY]);
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                //Console.WriteLine(newX + " " + newY);
+                return false;
+            }
+        }
     }
 
     public class CPPawn : CPClass
@@ -33,14 +62,31 @@ namespace Chess
         public CPPawn(int _x, int _y, ChessPieceColor _pieceColor) : base(_x, _y, _pieceColor)
         {
             CPName = "Pawn";
+        }
 
-            if (pieceColor == ChessPieceColor.White)
+        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves)
+        {
+            moves = new List<ChessBoardNode>();
+
+            if(pieceColor == ChessPieceColor.White)
             {
-                moveOffsets.Add(new Point(0, 1));
+                if(AddMove(board, x, y + 1, moves))
+                {
+                    if (y == 1)
+                    {
+                        AddMove(board, x, y + 2, moves);
+                    }
+                }
             }
             else
             {
-                moveOffsets.Add(new Point(0, -1));
+                if (AddMove(board, x, y - 1, moves))
+                {
+                    if (y == 6)
+                    {
+                        AddMove(board, x, y - 2, moves);
+                    }
+                }
             }
         }
     }
@@ -50,14 +96,39 @@ namespace Chess
         public CPRook(int _x, int _y, ChessPieceColor _pieceColor) : base(_x, _y, _pieceColor)
         {
             CPName = "Rook";
+        }
 
-            for (int xx = -8; xx <=8; xx++)
-            {
-                moveOffsets.Add(new Point(xx, 0));
+        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves)
+        {
+            moves = new List<ChessBoardNode>();
+
+            for (int i = 1; i < 8; i++) 
+            { 
+                if(!AddMove(board, x + i, y, moves))
+                {
+                    break;
+                }
             }
-            for (int yy = -8; yy <= 8; yy++)
+            for (int i = 1; i < 8; i++)
             {
-                moveOffsets.Add(new Point(0, yy));
+                if (!AddMove(board, x - i, y, moves))
+                {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x, y + i, moves))
+                {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x, y - i, moves))
+                {
+                    break;
+                }
             }
         }
     }
@@ -68,6 +139,39 @@ namespace Chess
         {
             CPName = "Bishop";
         }
+
+        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves)
+        {
+            moves = new List<ChessBoardNode>();
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x - i, y - i, moves))
+                {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x + i, y + i, moves))
+                {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x + i, y - i, moves))
+                {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x - i, y + i, moves))
+                {
+                    break;
+                }
+            }
+        }
     }
 
     public class CPKnight : CPClass
@@ -75,11 +179,15 @@ namespace Chess
         public CPKnight(int _x, int _y, ChessPieceColor _pieceColor) : base(_x, _y, _pieceColor)
         {
             CPName = "Knight";
-
-            moveOffsets.AddRange(new List<Point>() { new Point(1, 2), new Point(1, -2), new Point(-1, 2), new Point(-1, -2), new Point(2, 1), new Point(2, -1), new Point(-2, 1), new Point(-2, -1) });
         }
 
-        
+        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves)
+        {
+            moves = new List<ChessBoardNode>();
+            moves.AddRange(new List<ChessBoardNode> { board[x + 1, y + 2], board[x - 1, y + 2], board[x + 1, y - 2], board[x - 1, y - 2], board[x + 2, y + 1], board[x + 2, y - 1], board[x - 2, y + 1], board[x - 2, y - 1]});
+        }
+
+
     }
 
     public class CPQueen : CPClass
@@ -88,6 +196,11 @@ namespace Chess
         {
             CPName = "Queen";
         }
+
+        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves)
+        {
+            moves = new List<ChessBoardNode>();
+        }
     }
 
     public class CPKing : CPClass
@@ -95,12 +208,19 @@ namespace Chess
         public CPKing(int _x, int _y, ChessPieceColor _pieceColor) : base(_x, _y, _pieceColor)
         {
             CPName = "King";
+        }
 
-            for(int xx = -1; xx <= 1; xx++)
+        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves)
+        {
+            moves = new List<ChessBoardNode>();
+            for(int xx = -1; xx < 2; xx++)
             {
-                for(int yy = -1; yy <= 1; yy++)
+                for(int yy = -1; yy < 2; yy++)
                 {
-                     moveOffsets.Add(new Point(xx, yy));
+                    //if(xx != 0 & yy != 0)
+                    //{
+                        AddMove(board, x + xx, y + yy, moves);
+                    //}
                 }
             }
         }
