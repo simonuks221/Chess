@@ -11,6 +11,19 @@ using System.Windows.Forms;
 
 namespace Chess
 {
+    public enum MoveType { OnlyMove, OnlyAttack, MoveAndAttack}
+    public struct AvailableMove 
+    {
+        public MoveType moveType;
+        public ChessBoardNode node;
+
+        public AvailableMove(ChessBoardNode _node, MoveType _moveType = MoveType.MoveAndAttack)
+        {
+            node = _node;
+            moveType = _moveType;
+        }
+    };
+
     public partial class Form1 : Form
     {
         public ChessBoardNode[,] chessBoardNodeArray;
@@ -19,8 +32,7 @@ namespace Chess
         public int selectedX = -1; //Seected chess piece coords
         public int selectedY = -1;
 
-        List<ChessBoardNode> availableMoveNodes = new List<ChessBoardNode>();
-        List<ChessBoardNode> availableAttackNodes = new List<ChessBoardNode>();
+        List<AvailableMove> availableMoves = new List<AvailableMove>();
 
         ChessPieceColor moveColor;
 
@@ -118,25 +130,38 @@ namespace Chess
             {
                 if (chessBoardNodeArray[locX, locY].chessPiece != null && chessBoardNodeArray[locX, locY].chessPiece.pieceColor == moveColor)
                 {
-                    availableMoveNodes.Clear();
+                    availableMoves.Clear();
 
                     selectedX = locX;
                     selectedY = locY;
 
                     chessBoardNodeArray[locX, locY].ChangeColor(ChessBoardNodeColor.Selected);
-                    availableMoveNodes = GetMoves();
-                    ShowMoves(availableMoveNodes);
+                    availableMoves = GetMoves();
+                    ShowMoves(availableMoves);
                 }
             }
             else //Pressed after seleceting a piece, move a piece
             {
-                if (availableMoveNodes.Contains(chessBoardNodeArray[locX, locY]) || availableAttackNodes.Contains(chessBoardNodeArray[locX, locY]))
+                if (PressedOnAvailableMove(chessBoardNodeArray[locX, locY]))
                 {
                     ChangePieceLocation(selectedX, selectedY, locX, locY);
                 }
 
                 SoftClearBoard();
             }
+        }
+
+        bool PressedOnAvailableMove(ChessBoardNode nodePressed)
+        {
+            foreach(AvailableMove move in availableMoves)
+            {
+                if(move.node == nodePressed)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void SoftClearBoard() //Clears all highlighted tiles nad other stuff.
@@ -156,30 +181,28 @@ namespace Chess
                         chessBoardNodeArray[x, y].ChangeColor(ChessBoardNodeColor.None);
                     }
                 }
-                availableMoveNodes.Clear();
-                availableAttackNodes.Clear();
+                availableMoves.Clear();
             }
         }
 
-        public void ShowMoves(List<ChessBoardNode> moves) //Return if can move here
+        public void ShowMoves(List<AvailableMove> moves) //Return if can move here
         {
-            foreach (ChessBoardNode n in moves)
+            foreach (AvailableMove m in moves)
             {
-                Console.WriteLine(n.locationX + " " + n.locationY);
-                if (n.chessPiece == null)
+                if (m.node.chessPiece == null)
                 {
-                    n.ChangeColor(ChessBoardNodeColor.Selected);
+                    m.node.ChangeColor(ChessBoardNodeColor.Selected);
                 }
                 else
                 {
-                    n.ChangeColor(ChessBoardNodeColor.Kill);
+                    m.node.ChangeColor(ChessBoardNodeColor.Kill);
                 }
             }
         }
 
-        public List<ChessBoardNode> GetMoves() //Show valid selected piece moves
+        public List<AvailableMove> GetMoves() //Show valid selected piece moves
         {
-            List<ChessBoardNode> newMoves = new List<ChessBoardNode>();
+            List<AvailableMove> newMoves = new List<AvailableMove>();
 
             CPClass chessPiece = chessBoardNodeArray[selectedX, selectedY].chessPiece;
 
@@ -192,13 +215,13 @@ namespace Chess
         public void ChangePieceLocation(int fromX, int fromY, int toX, int toY) //Move piece
         {
             
-            if((CPKing)chessBoardNodeArray[toX, toY].chessPiece != null) //Check win conditions
-            {
-                moveColor = ChessPieceColor.None;
-                MoveLabel.Text = chessBoardNodeArray[fromX, fromY].chessPiece.pieceColor + " won";
-            }
-            else
-            {
+           // if((CPKing)chessBoardNodeArray[toX, toY].chessPiece != null) //Check win conditions
+           // {
+           //     moveColor = ChessPieceColor.None;
+           //     MoveLabel.Text = chessBoardNodeArray[fromX, fromY].chessPiece.pieceColor + " won";
+           // }
+           // else
+        //    {
                 chessBoardNodeArray[fromX, fromY].chessPiece.x = toX;
                 chessBoardNodeArray[fromX, fromY].chessPiece.y = toY;
 
@@ -216,7 +239,7 @@ namespace Chess
                     moveColor = ChessPieceColor.White;
                 }
                 MoveLabel.Text = moveColor.ToString();
-            }
+          //  }
             
             SoftClearBoard();
 

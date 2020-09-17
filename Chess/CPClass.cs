@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -25,16 +26,22 @@ namespace Chess
             pieceColor = _pieceColor;
         }
 
-        public abstract void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves);
+        public abstract void GetAvailableMoves(ChessBoardNode[,] board, out List<AvailableMove> moves);
 
-        protected bool AddMove(ChessBoardNode[,] board, int newX, int newY, List<ChessBoardNode> moveList)
+        protected bool AddMove(ChessBoardNode[,] board, int newX, int newY, List<AvailableMove> moveList, MoveType moveType = MoveType.MoveAndAttack)
         {
-            if(newX < 8 && newX >= 0 && newY < 8 && newY >= 0)
+            
+            if (newX < 8 && newX >= 0 && newY < 8 && newY >= 0)
             {
+                AvailableMove newMove = new AvailableMove(board[newX, newY], moveType);
                 if (board[newX, newY].chessPiece == null)
                 {
-                    moveList.Add(board[newX, newY]);
-                    return true;
+                    if (moveType == MoveType.OnlyAttack) return false;
+                    else
+                    {
+                        moveList.Add(newMove);
+                        return true;
+                    }
                 }
                 else
                 {
@@ -42,16 +49,19 @@ namespace Chess
                     {
                         return false;
                     }
+                    else if(moveType != MoveType.OnlyMove)
+                    {
+                        moveList.Add(newMove);
+                        return false;
+                    }
                     else
                     {
-                        moveList.Add(board[newX, newY]);
                         return false;
                     }
                 }
             }
             else
             {
-                //Console.WriteLine(newX + " " + newY);
                 return false;
             }
         }
@@ -59,32 +69,74 @@ namespace Chess
 
     public class CPPawn : CPClass
     {
+
+        public bool movedDouble = false;
         public CPPawn(int _x, int _y, ChessPieceColor _pieceColor) : base(_x, _y, _pieceColor)
         {
             CPName = "Pawn";
         }
 
-        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves)
+        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<AvailableMove> moves)
         {
-            moves = new List<ChessBoardNode>();
+            moves = new List<AvailableMove>();
+
+
+            
 
             if(pieceColor == ChessPieceColor.White)
             {
-                if(AddMove(board, x, y + 1, moves))
+                //Attack forward white
+                AddMove(board, x + 1, y + 1, moves, MoveType.OnlyAttack);
+                AddMove(board, x - 1, y + 1, moves, MoveType.OnlyAttack);
+
+                //Movement forward white
+                if (AddMove(board, x, y + 1, moves, MoveType.OnlyMove))
                 {
                     if (y == 1)
                     {
-                        AddMove(board, x, y + 2, moves);
+                        AddMove(board, x, y + 2, moves, MoveType.OnlyMove);
                     }
                 }
+
+                //En passant white
+                /*
+                if (board[x + 1, y].chessPiece != null)
+                {
+                    if (board[x + 1, y].chessPiece.GetType() == typeof(CPPawn))
+                    {
+                        CPPawn p = (CPPawn)board[x + 1, y].chessPiece;
+                        if (y == 4 && p.movedDouble)
+                        {
+                            AddMove(board, x + 1, y + 1, moves);
+                        }
+                    }
+                }
+                if (board[x - 1, y].chessPiece != null)
+                {
+                    if (board[x - 1, y].chessPiece.GetType() == typeof(CPPawn))
+                    {
+                        CPPawn p = (CPPawn)board[x - 1, y].chessPiece;
+                        if(y == 4 && p.movedDouble)
+                        {
+                            AddMove(board, x - 1, y + 1, moves);
+                        }
+                    }
+                }
+                */
+
             }
             else
             {
-                if (AddMove(board, x, y - 1, moves))
+                //Attack forward black
+                AddMove(board, x + 1, y - 1, moves, MoveType.OnlyAttack);
+                AddMove(board, x - 1, y - 1, moves, MoveType.OnlyAttack);
+
+                //Movement forward black
+                if (AddMove(board, x, y - 1, moves, MoveType.OnlyMove))
                 {
                     if (y == 6)
                     {
-                        AddMove(board, x, y - 2, moves);
+                        AddMove(board, x, y - 2, moves, MoveType.OnlyMove);
                     }
                 }
             }
@@ -98,9 +150,9 @@ namespace Chess
             CPName = "Rook";
         }
 
-        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves)
+        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<AvailableMove> moves)
         {
-            moves = new List<ChessBoardNode>();
+            moves = new List<AvailableMove>();
 
             for (int i = 1; i < 8; i++) 
             { 
@@ -140,9 +192,9 @@ namespace Chess
             CPName = "Bishop";
         }
 
-        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves)
+        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<AvailableMove> moves)
         {
-            moves = new List<ChessBoardNode>();
+            moves = new List<AvailableMove>();
             for (int i = 1; i < 8; i++)
             {
                 if (!AddMove(board, x - i, y - i, moves))
@@ -181,10 +233,10 @@ namespace Chess
             CPName = "Knight";
         }
 
-        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves)
+        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<AvailableMove> moves)
         {
-            moves = new List<ChessBoardNode>();
-            moves.AddRange(new List<ChessBoardNode> { board[x + 1, y + 2], board[x - 1, y + 2], board[x + 1, y - 2], board[x - 1, y - 2], board[x + 2, y + 1], board[x + 2, y - 1], board[x - 2, y + 1], board[x - 2, y - 1]});
+            moves = new List<AvailableMove>();
+            moves.AddRange(new List<AvailableMove> { new AvailableMove(board[x + 1, y + 2]), new AvailableMove(board[x - 1, y + 2]), new AvailableMove(board[x + 1, y - 2]), new AvailableMove(board[x - 1, y - 2]), new AvailableMove(board[x + 2, y + 1]), new AvailableMove(board[x + 2, y - 1]), new AvailableMove(board[x - 2, y + 1]), new AvailableMove(board[x - 2, y - 1])});
         }
 
 
@@ -197,9 +249,65 @@ namespace Chess
             CPName = "Queen";
         }
 
-        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves)
+        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<AvailableMove> moves)
         {
-            moves = new List<ChessBoardNode>();
+            moves = new List<AvailableMove>();
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x - i, y - i, moves))
+                {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x + i, y + i, moves))
+                {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x + i, y - i, moves))
+                {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x - i, y + i, moves))
+                {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x + i, y, moves))
+                {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x - i, y, moves))
+                {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x, y + i, moves))
+                {
+                    break;
+                }
+            }
+            for (int i = 1; i < 8; i++)
+            {
+                if (!AddMove(board, x, y - i, moves))
+                {
+                    break;
+                }
+            }
         }
     }
 
@@ -210,17 +318,14 @@ namespace Chess
             CPName = "King";
         }
 
-        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<ChessBoardNode> moves)
+        public override void GetAvailableMoves(ChessBoardNode[,] board, out List<AvailableMove> moves)
         {
-            moves = new List<ChessBoardNode>();
+            moves = new List<AvailableMove>();
             for(int xx = -1; xx < 2; xx++)
             {
                 for(int yy = -1; yy < 2; yy++)
                 {
-                    //if(xx != 0 & yy != 0)
-                    //{
-                        AddMove(board, x + xx, y + yy, moves);
-                    //}
+                     AddMove(board, x + xx, y + yy, moves);
                 }
             }
         }
