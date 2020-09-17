@@ -236,7 +236,17 @@ namespace Chess
         public override void GetAvailableMoves(ChessBoardNode[,] board, out List<AvailableMove> moves)
         {
             moves = new List<AvailableMove>();
-            moves.AddRange(new List<AvailableMove> { new AvailableMove(board[x + 1, y + 2]), new AvailableMove(board[x - 1, y + 2]), new AvailableMove(board[x + 1, y - 2]), new AvailableMove(board[x - 1, y - 2]), new AvailableMove(board[x + 2, y + 1]), new AvailableMove(board[x + 2, y - 1]), new AvailableMove(board[x - 2, y + 1]), new AvailableMove(board[x - 2, y - 1])});
+            AddMove(board, x + 2, y + 1, moves);
+            AddMove(board, x + 2, y - 1, moves);
+
+            AddMove(board, x - 2, y + 1, moves);
+            AddMove(board, x - 2, y + 1, moves);
+
+            AddMove(board, x - 1, y - 2, moves);
+            AddMove(board, x + 1, y - 2, moves);
+
+            AddMove(board, x - 1, y + 2, moves);
+            AddMove(board, x + 1, y + 2, moves);
         }
 
 
