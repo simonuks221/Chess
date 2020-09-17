@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace Chess
 {
-    public enum MoveType { OnlyMove, OnlyAttack, MoveAndAttack}
+    public enum MoveType { OnlyMove, OnlyAttack, MoveAndAttack, Castling}
     public struct AvailableMove 
     {
         public MoveType moveType;
@@ -44,6 +44,7 @@ namespace Chess
         private void Form1_Load(object sender, EventArgs e) //Reset board on start
         {
             ResetBoard();
+            Console.WriteLine(chessBoardNodeArray[1, 1].chessPiece + "adadadadadaada");
         }
 
         void ResetBoard()
@@ -142,26 +143,27 @@ namespace Chess
             }
             else //Pressed after seleceting a piece, move a piece
             {
-                if (PressedOnAvailableMove(chessBoardNodeArray[locX, locY]))
+                AvailableMove pressedMove = PressedOnAvailableMove(chessBoardNodeArray[locX, locY]);
+                if (pressedMove.node != null)
                 {
-                    ChangePieceLocation(selectedX, selectedY, locX, locY);
+                    ChangePieceLocation(selectedX, selectedY, pressedMove);
                 }
 
                 SoftClearBoard();
             }
         }
 
-        bool PressedOnAvailableMove(ChessBoardNode nodePressed)
+        AvailableMove PressedOnAvailableMove(ChessBoardNode nodePressed)
         {
             foreach(AvailableMove move in availableMoves)
             {
                 if(move.node == nodePressed)
                 {
-                    return true;
+                    return move;
                 }
             }
 
-            return false;
+            return new AvailableMove(null);
         }
 
         public void SoftClearBoard() //Clears all highlighted tiles nad other stuff.
@@ -212,44 +214,70 @@ namespace Chess
         }
 
 
-        public void ChangePieceLocation(int fromX, int fromY, int toX, int toY) //Move piece
+        public void ChangePieceLocation(int fromX, int fromY, AvailableMove moveTo) //Move piece
         {
-            
-           // if((CPKing)chessBoardNodeArray[toX, toY].chessPiece != null) //Check win conditions
-           // {
-           //     moveColor = ChessPieceColor.None;
-           //     MoveLabel.Text = chessBoardNodeArray[fromX, fromY].chessPiece.pieceColor + " won";
-           // }
-           // else
-        //    {
-                chessBoardNodeArray[fromX, fromY].chessPiece.x = toX;
-                chessBoardNodeArray[fromX, fromY].chessPiece.y = toY;
-
-                chessBoardNodeArray[toX, toY].ChangePiece(chessBoardNodeArray[fromX, fromY].chessPiece);
-                chessBoardNodeArray[fromX, fromY].ChangePiece(null);
-
-                //Change current moving team color
-                if (moveColor == ChessPieceColor.White)
-                {
-                    moveColor = ChessPieceColor.Black;
-                    
-                }
-                else
-                {
-                    moveColor = ChessPieceColor.White;
-                }
-                MoveLabel.Text = moveColor.ToString();
-          //  }
-            
-            SoftClearBoard();
-
-            if (moveColor == ChessPieceColor.Black)
+            switch (moveTo.moveType)
             {
-                if (UseAiCheckBox.Checked)
-                {
+                case MoveType.Castling:
+                    if(moveColor == ChessPieceColor.White) //White castles
+                    {
+                        if(moveTo.node.locationX == 6) //Short castles
+                        {
+                            moveTo.node.ChangePiece(chessBoardNodeArray[4, 0].chessPiece);
+                            chessBoardNodeArray[fromX, fromY].ChangePiece(null);
+                            moveTo.node.chessPiece.moved = true;
+
+                            chessBoardNodeArray[5, 0].ChangePiece(chessBoardNodeArray[7, 0].chessPiece);
+                            chessBoardNodeArray[7, 0].ChangePiece(null);
+                            chessBoardNodeArray[5, 0].chessPiece.moved = true;
+                        }
+                        else //Long castles
+                        {
+                            moveTo.node.ChangePiece(chessBoardNodeArray[4, 0].chessPiece);
+                            chessBoardNodeArray[fromX, fromY].ChangePiece(null);
+                            moveTo.node.chessPiece.moved = true;
+
+                            chessBoardNodeArray[3, 0].ChangePiece(chessBoardNodeArray[0, 0].chessPiece);
+                            chessBoardNodeArray[0, 0].ChangePiece(null);
+                            chessBoardNodeArray[3, 0].chessPiece.moved = true;
+                        }
+                    }
+                    else //Black castles
+                    {
+                        if (moveTo.node.locationX == 6) //Short castles
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                    break;
+
+                default:
+                    Console.WriteLine(fromY + "ssss");
+                    Console.WriteLine(chessBoardNodeArray[fromX, fromY].chessPiece + "adad");
+                    moveTo.node.ChangePiece(chessBoardNodeArray[fromX, fromY].chessPiece);
                     
-                }
+                    chessBoardNodeArray[fromX, fromY].ChangePiece(null);
+                    moveTo.node.chessPiece.moved = true;
+                    break;
             }
+
+            //Change current moving team color
+            if (moveColor == ChessPieceColor.White)
+            {
+                moveColor = ChessPieceColor.Black;
+
+            }
+            else
+            {
+                moveColor = ChessPieceColor.White;
+            }
+            MoveLabel.Text = moveColor.ToString();
+
+            SoftClearBoard();
         }
 
         private void ResetButton_Click(object sender, EventArgs e) //Reset board on button press

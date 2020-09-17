@@ -26,6 +26,12 @@ public class ChessBoardNode
     public void ChangePiece(CPClass _chessPiece) //Changes piece location
     {
         chessPiece = _chessPiece;
+        if(chessPiece != null)
+        {
+            chessPiece.x = locationX;
+            chessPiece.y = locationY;
+        }
+
         if (thisButton != null)
         {
             if (chessPiece == null) //empty piece

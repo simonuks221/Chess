@@ -19,11 +19,14 @@ namespace Chess
 
         public string CPName = "NULL";
 
+        public bool moved;
+
         public CPClass(int _x, int _y, ChessPieceColor _pieceColor)
         {
             x = _x;
             y = _y;
             pieceColor = _pieceColor;
+            moved = false;
         }
 
         public abstract void GetAvailableMoves(ChessBoardNode[,] board, out List<AvailableMove> moves);
@@ -248,8 +251,6 @@ namespace Chess
             AddMove(board, x - 1, y + 2, moves);
             AddMove(board, x + 1, y + 2, moves);
         }
-
-
     }
 
     public class CPQueen : CPClass
@@ -337,6 +338,35 @@ namespace Chess
                 {
                      AddMove(board, x + xx, y + yy, moves);
                 }
+            }
+
+            //Casling
+            if(pieceColor == ChessPieceColor.White)
+            {
+                if(x == 4 && y == 0 && moved == false)
+                {
+                    //Short castle
+                    if(board[7, 0].chessPiece != null)
+                    {
+                        if (board[7, 0].chessPiece.moved == false && board[6, 0].chessPiece == null && board[5, 0].chessPiece == null)
+                        {
+                            moves.Add(new AvailableMove(board[6, 0], MoveType.Castling));
+                        }
+                    }
+
+                    //Long castle
+                    if (board[0, 0].chessPiece != null)
+                    {
+                        if (board[0, 0].chessPiece.moved == false && board[1, 0].chessPiece == null && board[2, 0].chessPiece == null && board[3, 0].chessPiece == null)
+                        {
+                            moves.Add(new AvailableMove(board[2, 0], MoveType.Castling));
+                        }
+                    }
+                }
+            }
+            else
+            {
+
             }
         }
     }
